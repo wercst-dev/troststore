@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ панель | TG Accounts</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        .hidden { display: none !important; }
+        
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --card: #f8f9fa;
+            --border: #e0e0e0;
+            --accent: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+        }
+        .dark { 
+            --bg: #000000; 
+            --text: #ffffff; 
+            --card: #1a1a1a;
+            --border: #333333;
+        }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; }
+    </style>
+</head>
+<body>
+    <!-- Логин форма -->
+    <div id="loginForm" style="
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+    ">
+        <div style="
+            background: var(--card);
+            border-radius: 12px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        ">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <i class="fas fa-lock fa-2x" style="color: var(--accent); margin-bottom: 1rem;"></i>
+                <h2 style="margin-bottom: 0.5rem;">Администратор</h2>
+                <p style="color: #666;">Введите пароль для входа</p>
+            </div>
+            
+            <form id="loginFormElement" style="margin-bottom: 1.5rem;">
+                <div style="margin-bottom: 1rem;">
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        background: var(--bg);
+                        border: 1px solid var(--border);
+                        border-radius: 8px;
+                        padding: 0 15px;
+                    ">
+                        <i class="fas fa-key" style="color: #666;"></i>
+                        <input type="password" id="adminPassword" placeholder="Пароль" required style="
+                            flex: 1;
+                            padding: 15px;
+                            border: none;
+                            background: none;
+                            color: var(--text);
+                            font-size: 1rem;
+                        ">
+                    </div>
+                </div>
+                
+                <div id="loginError" class="hidden" style="
+                    background: rgba(220, 38, 38, 0.1);
+                    color: var(--danger);
+                    padding: 10px;
+                    border-radius: 6px;
+                    margin-bottom: 1rem;
+                    border: 1px solid rgba(220, 38, 38, 0.3);
+                "></div>
+                
+                <button type="submit" style="
+                    width: 100%;
+                    padding: 15px;
+                    background: var(--accent);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                ">
+                    <i class="fas fa-sign-in-alt"></i> Войти
+                </button>
+            </form>
+            
+            <div style="
+                margin-top: 1.5rem;
+                padding: 1rem;
+                background: var(--bg);
+                border-radius: 8px;
+                font-size: 0.9rem;
+                color: #666;
+            ">
+                <p><strong>Пароль:</strong> 241512</p>
+            </div>
+            
+            <div style="
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid var(--border);
+                color: #666;
+            ">
+                <p><i class="fas fa-user-shield"></i> Главный админ: @opavshue</p>
+                <p style="margin-top: 0.5rem;"><i class="fas fa-headset"></i> Техподдержка: @opavshue</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Админ панель -->
+    <div id="adminPanel" class="hidden">
+        <!-- Шапка -->
+        <header style="
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+        ">
+            <div style="
+                max-width: 1200px;
+                margin: 0 auto;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            ">
+                <div>
+                    <h1 style="font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-cogs" style="color: var(--accent);"></i>
+                        Панель управления
+                    </h1>
+                    <p style="color: #666; font-size: 0.9rem; margin-top: 0.25rem;">
+                        Главный админ: @opavshue
+                    </p>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button id="logoutBtn" style="
+                        padding: 8px 16px;
+                        background: var(--danger);
+                        color: white;
+                        border: none;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    ">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Основной контент -->
+        <main style="padding: 2rem 1rem;">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <!-- Форма добавления -->
+                <div style="
+                    background: var(--card);
+                    border-radius: 12px;
+                    padding: 1.5rem;
+                    margin-bottom: 2rem;
+                    border: 1px solid var(--border);
+                ">
+                    <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-plus-circle" style="color: var(--accent);"></i>
+                        Добавить новое объявление
+                    </h2>
+                    
+                    <form id="addAccountForm">
+                        <div style="
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                            gap: 1rem;
+                            margin-bottom: 1.5rem;
+                        ">
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                                    Название аккаунта
+                                </label>
+                                <input type="text" id="accountTitle" required style="
+                                    width: 100%;
+                                    padding: 12px;
+                                    border: 1px solid var(--border);
+                                    border-radius: 6px;
+                                    background: var(--bg);
+                                    color: var(--text);
+                                " placeholder="Премиум аккаунт с историей">
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                                    Цена (₽)
+                                </label>
+                                <input type="number" id="accountPrice" required style="
+                                    width: 100%;
+                                    padding: 12px;
+                                    border: 1px solid var(--border);
+                                    border-radius: 6px;
+                                    background: var(--bg);
+                                    color: var(--text);
+                                " placeholder="1500">
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                                    Телефон (первые 4 цифры)
+                                </label>
+                                <input type="text" id="accountPhone" style="
+                                    width: 100%;
+                                    padding: 12px;
+                                    border: 1px solid var(--border);
+                                    border-radius: 6px;
+                                    background: var(--bg);
+                                    color: var(--text);
+                                " placeholder="7916">
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                                    Статус
+                                </label>
+                                <select id="accountStatus" style="
+                                    width: 100%;
+                                    padding: 12px;
+                                    border: 1px solid var(--border);
+                                    border-radius: 6px;
+                                    background: var(--bg);
+                                    color: var(--text);
+                                ">
+                                    <option value="active">Активно</option>
+                                    <option value="sold">Продано</option>
+                                    <option value="hidden">Скрыто</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                                    Тип
+                                </label>
+                                <select id="accountType" style="
+                                    width: 100%;
+                                    padding: 12px;
+                                    border: 1px solid var(--border);
+                                    border-radius: 6px;
+                                    background: var(--bg);
+                                    color: var(--text);
+                                ">
+                                    <option value="premium">Премиум</option>
+                                    <option value="standard">Стандарт</option>
+                                    <option value="budget">Бюджет</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                                Описание
+                            </label>
+                            <textarea id="accountDescription" rows="4" required style="
+                                width: 100%;
+                                padding: 12px;
+                                border: 1px solid var(--border);
+                                border-radius: 6px;
+                                background: var(--bg);
+                                color: var(--text);
+                                resize: vertical;
+                            " placeholder="Подробное описание аккаунта..."></textarea>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="submit" style="
+                                padding: 12px 24px;
+                                background: var(--accent);
+                                color: white;
+                                border: none;
+                                border-radius: 6px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                            ">
+                                <i class="fas fa-check"></i> Добавить объявление
+                            </button>
+                            
+                            <button type="button" id="clearFormBtn" style="
+                                padding: 12px 24px;
+                                background: var(--card);
+                                color: var(--text);
+                                border: 1px solid var(--border);
+                                border-radius: 6px;
+                                font-weight: 600;
+                                cursor: pointer;
+                            ">
+                                Очистить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Список объявлений -->
+                <div style="
+                    background: var(--card);
+                    border-radius: 12px;
+                    border: 1px solid var(--border);
+                    overflow: hidden;
+                ">
+                    <div style="
+                        padding: 1.5rem;
+                        border-bottom: 1px solid var(--border);
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    ">
+                        <h2 style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-list"></i> Все объявления
+                            <span id="adminAccountsCount" style="
+                                background: var(--accent);
+                                color: white;
+                                padding: 4px 12px;
+                                border-radius: 20px;
+                                font-size: 0.9rem;
+                            ">0</span>
+                        </h2>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button id="refreshBtn" style="
+                                padding: 8px 16px;
+                                background: var(--card);
+                                color: var(--text);
+                                border: 1px solid var(--border);
+                                border-radius: 6px;
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                            ">
+                                <i class="fas fa-sync-alt"></i> Обновить
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="adminAccountsList" style="min-height: 200px;">
+                        <!-- Аккаунты загружаются через JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Футер -->
+        <footer style="
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+        ">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <div style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    gap: 1rem;
+                ">
+                    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                        <p>Активных: <span id="activeCount" style="font-weight: 600;">0</span></p>
+                        <p>Продано: <span id="soldCount" style="font-weight: 600;">0</span></p>
+                        <p>Общая сумма: <span id="totalValue" style="font-weight: 600;">0</span>₽</p>
+                    </div>
+                    
+                    <div style="color: #666; font-size: 0.9rem;">
+                        <p>Все данные сохраняются в localStorage браузера</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Модалка редактирования -->
+    <div id="editModal" class="hidden" style="
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+    ">
+        <div style="
+            background: var(--card);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        ">
+            <div style="
+                padding: 1.5rem;
+                border-bottom: 1px solid var(--border);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            ">
+                <h3>Редактировать объявление</h3>
+                <button class="modal-close" style="
+                    background: none;
+                    border: none;
+                    font-size: 1.5rem;
+                    color: var(--text);
+                    cursor: pointer;
+                ">&times;</button>
+            </div>
+            
+            <div style="padding: 1.5rem;">
+                <form id="editAccountForm">
+                    <!-- Заполняется через JS -->
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
