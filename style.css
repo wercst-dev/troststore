@@ -848,3 +848,24 @@ body {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+/* Добавьте анимацию спиннера */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Стиль для информации о номере */
+.phone-info {
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 10px 0;
+    font-size: 0.9em;
+    color: #666;
+    border-left: 3px solid #0088cc;
+}
+
+.dark-mode .phone-info {
+    background: #2d3748;
+    color: #cbd5e0;
+}
