@@ -3,366 +3,450 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Accounts Store</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Telegram Accounts</title>
     <style>
-        /* Быстрые inline стили */
+        /* ВСЕ СТИЛИ ВНУТРИ HTML */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: system-ui, -apple-system, sans-serif; transition: background 0.3s; }
+        body { font-family: Arial, sans-serif; background: white; color: black; transition: 0.3s; }
+        body.dark { background: black; color: white; }
         .hidden { display: none !important; }
         
-        /* Тема */
-        :root {
-            --bg: #ffffff;
-            --text: #000000;
-            --card: #f8f9fa;
-            --border: #e0e0e0;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-        }
-        .dark { 
-            --bg: #000000; 
-            --text: #ffffff; 
-            --card: #1a1a1a;
-            --border: #333333;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
-        }
-        body { background: var(--bg); color: var(--text); }
-        
         /* Загрузчик */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--accent);
-            border-radius: 50%;
+        #loader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        body.dark #loader { background: black; }
+        
+        .spinner {
             width: 50px;
             height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #007bff;
+            border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Шапка */
+        header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-    </style>
-</head>
-<body>
-    <!-- Загрузчик -->
-    <div id="loader" style="
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: var(--bg);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    ">
-        <div class="loader"></div>
-        <p style="margin-top: 20px;">Загрузка...</p>
-    </div>
-
-    <!-- Шапка -->
-    <header style="
-        background: var(--card);
-        border-bottom: 1px solid var(--border);
-        padding: 1rem;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    ">
-        <div style="
+        body.dark header { background: #1a1a1a; border-color: #333; }
+        
+        .header-content {
             max-width: 1200px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        ">
-            <h1 style="font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                <i class="fab fa-telegram" style="color: var(--accent);"></i>
-                TG Аккаунты
-            </h1>
-            
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="admin.html" style="
-                    text-decoration: none;
-                    padding: 8px 16px;
-                    background: var(--accent);
-                    color: white;
-                    border-radius: 6px;
-                    font-size: 0.9rem;
-                ">
-                    <i class="fas fa-lock"></i> Админ
-                </a>
-                
-                <button id="themeToggle" style="
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    border: 1px solid var(--border);
-                    background: var(--card);
-                    color: var(--text);
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                ">
-                    <i class="fas fa-moon"></i>
-                </button>
+        }
+        
+        /* Кнопки */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        
+        /* Карточки */
+        .account-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        body.dark .account-card { background: #1a1a1a; border-color: #333; }
+        
+        /* Модалка */
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+        }
+        body.dark .modal-content { background: #1a1a1a; }
+        
+        /* Футер */
+        footer {
+            background: #f8f9fa;
+            padding: 30px 15px 15px;
+            border-top: 1px solid #ddd;
+            margin-top: 30px;
+        }
+        body.dark footer { background: #1a1a1a; border-color: #333; }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Загрузчик -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 20px;">Загрузка магазина...</p>
+    </div>
+
+    <!-- Шапка -->
+    <header>
+        <div class="header-content">
+            <h1>📱 Telegram Аккаунты</h1>
+            <div>
+                <a href="admin.html" class="btn btn-primary">🔐 Админка</a>
+                <button onclick="toggleTheme()" class="btn" style="margin-left: 10px;">🌙</button>
             </div>
         </div>
     </header>
 
     <!-- Поиск -->
-    <section style="
-        padding: 2rem 1rem;
-        background: var(--card);
-        border-bottom: 1px solid var(--border);
-    ">
+    <section style="padding: 20px; background: #f0f0f0;">
         <div style="max-width: 1200px; margin: 0 auto;">
-            <div style="
-                display: flex;
-                align-items: center;
-                background: var(--bg);
-                border: 1px solid var(--border);
-                border-radius: 8px;
-                padding: 0 15px;
-                max-width: 600px;
-                margin: 0 auto 1rem auto;
-            ">
-                <i class="fas fa-search" style="color: #666;"></i>
-                <input type="text" id="searchInput" placeholder="Поиск аккаунтов..." style="
-                    flex: 1;
-                    padding: 15px;
-                    border: none;
-                    background: none;
-                    color: var(--text);
-                    font-size: 1rem;
-                ">
-                <button id="searchBtn" style="
-                    padding: 12px 24px;
-                    background: var(--accent);
-                    color: white;
-                    border: none;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    font-weight: 600;
-                ">
-                    Найти
-                </button>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="searchInput" placeholder="Поиск по названию, цене..." 
+                       style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                <button onclick="searchAccounts()" class="btn btn-primary">🔍 Найти</button>
             </div>
-            
-            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                <button class="filter-btn active" data-filter="all" style="
-                    padding: 8px 16px;
-                    border: 1px solid var(--border);
-                    background: var(--card);
-                    color: var(--text);
-                    border-radius: 20px;
-                    cursor: pointer;
-                ">Все</button>
-                <button class="filter-btn" data-filter="available" style="
-                    padding: 8px 16px;
-                    border: 1px solid var(--border);
-                    background: var(--card);
-                    color: var(--text);
-                    border-radius: 20px;
-                    cursor: pointer;
-                ">В наличии</button>
-                <button class="filter-btn" data-filter="premium" style="
-                    padding: 8px 16px;
-                    border: 1px solid var(--border);
-                    background: var(--card);
-                    color: var(--text);
-                    border-radius: 20px;
-                    cursor: pointer;
-                ">Премиум</button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button onclick="filterAccounts('all')" class="btn btn-primary">Все</button>
+                <button onclick="filterAccounts('active')" class="btn">Активные</button>
+                <button onclick="filterAccounts('premium')" class="btn">Премиум</button>
+                <button onclick="filterAccounts('cheap')" class="btn">До 1000₽</button>
             </div>
         </div>
     </section>
 
-    <!-- Основной контент -->
-    <main style="padding: 2rem 1rem; min-height: 60vh;">
-        <div style="max-width: 1200px; margin: 0 auto;">
-            <div style="margin-bottom: 2rem;">
-                <p>Найдено: <span id="accountsCount">0</span> аккаунтов</p>
-            </div>
-
-            <!-- Аккаунты -->
-            <div id="accountsGrid" style="
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                gap: 1.5rem;
-                margin-bottom: 3rem;
-            ">
-                <!-- Аккаунты загружаются через JS -->
-            </div>
-
-            <!-- Нет аккаунтов -->
-            <div id="noAccounts" class="hidden" style="
-                text-align: center;
-                padding: 3rem;
-                color: #666;
-            ">
-                <i class="fas fa-search fa-3x" style="margin-bottom: 1rem;"></i>
-                <h3 style="margin-bottom: 0.5rem;">Аккаунты не найдены</h3>
-                <p>Попробуйте изменить параметры поиска</p>
-            </div>
+    <!-- Аккаунты -->
+    <main style="padding: 20px; max-width: 1200px; margin: 0 auto;">
+        <h2>📋 Доступные аккаунты (<span id="count">0</span>)</h2>
+        <div id="accounts" style="margin-top: 20px;">
+            <!-- Аккаунты появятся здесь -->
+        </div>
+        
+        <div id="noAccounts" class="hidden" style="text-align: center; padding: 50px;">
+            <h3>😔 Аккаунты не найдены</h3>
+            <p>Попробуйте другой поиск</p>
         </div>
     </main>
 
     <!-- Футер -->
-    <footer style="
-        background: var(--card);
-        border-top: 1px solid var(--border);
-        padding: 3rem 1rem 1rem;
-    ">
-        <div style="max-width: 1200px; margin: 0 auto;">
-            <div style="
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 2rem;
-                margin-bottom: 2rem;
-            ">
-                <div>
-                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-shopping-cart"></i> Как купить
-                    </h3>
-                    <p>1. Выберите аккаунт</p>
-                    <p>2. Нажмите "Купить"</p>
-                    <p>3. Напишите в Telegram</p>
-                </div>
-                
-                <div>
-                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-headset"></i> Контакты
-                    </h3>
-                    <p>
-                        <i class="fab fa-telegram"></i>
-                        Для покупки: <a href="https://t.me/tonurx" target="_blank" style="color: var(--accent);">@tonurx</a>
-                    </p>
-                    <p>
-                        <i class="fas fa-life-ring"></i>
-                        Техподдержка: <a href="https://t.me/opavshue" target="_blank" style="color: var(--accent);">@opavshue</a>
-                    </p>
-                </div>
-                
-                <div>
-                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-shield-alt"></i> Гарантии
-                    </h3>
-                    <p>✓ 100% безопасно</p>
-                    <p>✓ Мгновенная доставка</p>
-                    <p>✓ Гарантия 30 дней</p>
-                </div>
+    <footer>
+        <div class="footer-content">
+            <div>
+                <h3>🛒 Как купить</h3>
+                <p>1. Выберите аккаунт</p>
+                <p>2. Нажмите "Купить"</p>
+                <p>3. Напишите в Telegram</p>
             </div>
             
-            <div style="
-                text-align: center;
-                padding-top: 2rem;
-                border-top: 1px solid var(--border);
-                color: #666;
-                font-size: 0.9rem;
-            ">
-                <p>© 2024 Telegram Accounts Store | v1.0</p>
+            <div>
+                <h3>📞 Контакты</h3>
+                <p><strong>Для покупки:</strong> @tonurx</p>
+                <p><strong>Техподдержка:</strong> @opavshue</p>
             </div>
+            
+            <div>
+                <h3>✅ Гарантии</h3>
+                <p>✓ 100% безопасно</p>
+                <p>✓ Мгновенная доставка</p>
+                <p>✓ Гарантия 30 дней</p>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+            <p>© 2024 Telegram Accounts Store</p>
         </div>
     </footer>
 
     <!-- Модалка покупки -->
-    <div id="buyModal" class="hidden" style="
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.7);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        padding: 1rem;
-    ">
-        <div style="
-            background: var(--card);
-            border-radius: 12px;
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-        ">
-            <div style="
-                padding: 1.5rem;
-                border-bottom: 1px solid var(--border);
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            ">
-                <h3>Купить аккаунт</h3>
-                <button id="closeModal" style="
-                    background: none;
-                    border: none;
-                    font-size: 1.5rem;
-                    color: var(--text);
-                    cursor: pointer;
-                ">&times;</button>
+    <div id="buyModal" class="modal hidden">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>🛒 Купить аккаунт</h3>
+                <button onclick="closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
             </div>
             
-            <div style="padding: 1.5rem;">
-                <div id="modalAccountInfo"></div>
-                
-                <div style="
-                    margin: 1.5rem 0;
-                    padding: 1rem;
-                    background: var(--bg);
-                    border-radius: 8px;
-                ">
-                    <p><strong>Инструкция:</strong></p>
-                    <ol style="margin-top: 0.5rem; padding-left: 1.5rem;">
-                        <li>Скопируйте информацию об аккаунте</li>
-                        <li>Перейдите в Telegram</li>
-                        <li>Напишите <a href="https://t.me/tonurx" target="_blank" style="color: var(--accent);">@tonurx</a></li>
-                        <li>Отправьте данные аккаунта</li>
-                        <li>Ожидайте ответа (1-5 минут)</li>
-                    </ol>
-                </div>
-                
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <button id="copyInfoBtn" style="
-                        flex: 1;
-                        padding: 12px;
-                        background: var(--accent);
-                        color: white;
-                        border: none;
-                        border-radius: 6px;
-                        cursor: pointer;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 8px;
-                    ">
-                        <i class="fas fa-copy"></i> Скопировать данные
-                    </button>
-                    
-                    <a id="telegramLink" target="_blank" style="
-                        flex: 1;
-                        padding: 12px;
-                        background: #0088cc;
-                        color: white;
-                        border-radius: 6px;
-                        text-decoration: none;
-                        text-align: center;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 8px;
-                    ">
-                        <i class="fab fa-telegram"></i> Написать в Telegram
-                    </a>
-                </div>
+            <div id="modalInfo"></div>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                <p><strong>Инструкция:</strong></p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>Скопируйте данные аккаунта</li>
+                    <li>Напишите в Telegram: @tonurx</li>
+                    <li>Отправьте данные</li>
+                    <li>Ожидайте ответа (1-5 минут)</li>
+                </ol>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button onclick="copyAccountInfo()" class="btn btn-primary" style="flex: 1;">📋 Копировать данные</button>
+                <a id="telegramBtn" target="_blank" class="btn btn-success" style="flex: 1;">💬 Написать в Telegram</a>
             </div>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        // ВСЕ СКРИПТЫ ВНУТРИ HTML
+        console.log('Сайт загружается...');
+        
+        // Данные аккаунтов
+        let accounts = [];
+        let filteredAccounts = [];
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let currentAccount = null;
+        
+        // Загружаем данные
+        function loadData() {
+            const saved = localStorage.getItem('tgshop_accounts');
+            if (saved) {
+                accounts = JSON.parse(saved);
+            } else {
+                // Демо данные
+                accounts = [
+                    {
+                        id: '1',
+                        title: 'Премиум аккаунт 2018',
+                        description: 'Старый проверенный аккаунт с историей',
+                        price: 2500,
+                        type: 'premium',
+                        status: 'active',
+                        phone: '7916',
+                        date: '2024-01-15'
+                    },
+                    {
+                        id: '2',
+                        title: 'Базовый аккаунт 2023',
+                        description: 'Новый аккаунт, готов к использованию',
+                        price: 800,
+                        type: 'standard',
+                        status: 'active',
+                        phone: '7903',
+                        date: '2024-01-16'
+                    },
+                    {
+                        id: '3',
+                        title: 'Бюджетный вариант',
+                        description: 'Аккаунт 2022 года, базовая функциональность',
+                        price: 450,
+                        type: 'budget',
+                        status: 'active',
+                        phone: '7955',
+                        date: '2024-01-17'
+                    }
+                ];
+                saveData();
+            }
+            
+            // Прячем загрузчик и показываем контент
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                renderAccounts();
+            }, 500);
+        }
+        
+        // Сохраняем данные
+        function saveData() {
+            localStorage.setItem('tgshop_accounts', JSON.stringify(accounts));
+        }
+        
+        // Рендерим аккаунты
+        function renderAccounts() {
+            filteredAccounts = accounts.filter(account => {
+                // Фильтр
+                if (currentFilter === 'active') return account.status === 'active';
+                if (currentFilter === 'premium') return account.type === 'premium';
+                if (currentFilter === 'cheap') return account.price <= 1000;
+                return true;
+            });
+            
+            // Поиск
+            if (currentSearch) {
+                const search = currentSearch.toLowerCase();
+                filteredAccounts = filteredAccounts.filter(account =>
+                    account.title.toLowerCase().includes(search) ||
+                    account.description.toLowerCase().includes(search) ||
+                    account.price.toString().includes(search) ||
+                    account.phone.includes(search)
+                );
+            }
+            
+            // Показываем только активные
+            filteredAccounts = filteredAccounts.filter(acc => acc.status === 'active');
+            
+            // Обновляем счетчик
+            document.getElementById('count').textContent = filteredAccounts.length;
+            
+            // Очищаем контейнер
+            const container = document.getElementById('accounts');
+            container.innerHTML = '';
+            
+            // Показываем/скрываем "нет аккаунтов"
+            const noAccounts = document.getElementById('noAccounts');
+            if (filteredAccounts.length === 0) {
+                noAccounts.classList.remove('hidden');
+                return;
+            } else {
+                noAccounts.classList.add('hidden');
+            }
+            
+            // Рендерим карточки
+            filteredAccounts.forEach(account => {
+                const card = document.createElement('div');
+                card.className = 'account-card';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <h3 style="font-size: 18px;">${account.title}</h3>
+                        <span style="
+                            background: ${account.type === 'premium' ? '#ffd700' : account.type === 'standard' ? '#c0c0c0' : '#cd7f32'};
+                            color: #333;
+                            padding: 3px 10px;
+                            border-radius: 12px;
+                            font-size: 12px;
+                            font-weight: bold;
+                        ">
+                            ${account.type === 'premium' ? 'ПРЕМИУМ' : account.type === 'standard' ? 'СТАНДАРТ' : 'БЮДЖЕТ'}
+                        </span>
+                    </div>
+                    
+                    <p style="color: #666; margin-bottom: 15px; line-height: 1.5;">
+                        ${account.description}
+                    </p>
+                    
+                    ${account.phone ? `
+                    <div style="background: #f8f9fa; padding: 8px 12px; border-radius: 4px; margin-bottom: 15px;">
+                        📱 Номер: ${account.phone}******
+                    </div>
+                    ` : ''}
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="font-size: 24px; font-weight: bold; color: #007bff;">
+                            ${account.price}₽
+                        </div>
+                        <button onclick="openBuyModal('${account.id}')" class="btn btn-primary">
+                            🛒 Купить
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        // Поиск
+        function searchAccounts() {
+            currentSearch = document.getElementById('searchInput').value;
+            renderAccounts();
+        }
+        
+        // Фильтры
+        function filterAccounts(filter) {
+            currentFilter = filter;
+            renderAccounts();
+        }
+        
+        // Тема
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        }
+        
+        // Модалка покупки
+        function openBuyModal(accountId) {
+            currentAccount = accounts.find(acc => acc.id === accountId);
+            if (!currentAccount) return;
+            
+            document.getElementById('modalInfo').innerHTML = `
+                <h4>${currentAccount.title}</h4>
+                <p><strong>Описание:</strong> ${currentAccount.description}</p>
+                <p><strong>Цена:</strong> ${currentAccount.price}₽</p>
+                ${currentAccount.phone ? `<p><strong>Номер:</strong> ${currentAccount.phone}******</p>` : ''}
+                <p><strong>Тип:</strong> ${currentAccount.type === 'premium' ? 'Премиум' : currentAccount.type === 'standard' ? 'Стандарт' : 'Бюджет'}</p>
+                <p><strong>ID:</strong> ${currentAccount.id}</p>
+            `;
+            
+            const message = `Здравствуйте! Хочу купить аккаунт:\n\n` +
+                           `Название: ${currentAccount.title}\n` +
+                           `ID: ${currentAccount.id}\n` +
+                           `Цена: ${currentAccount.price}₽\n` +
+                           `Номер: ${currentAccount.phone || 'не указан'}******\n\n` +
+                           `Пожалуйста, свяжитесь со мной.`;
+            
+            document.getElementById('telegramBtn').href = `https://t.me/tonurx?text=${encodeURIComponent(message)}`;
+            document.getElementById('telegramBtn').dataset.info = message;
+            
+            document.getElementById('buyModal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('buyModal').classList.add('hidden');
+        }
+        
+        function copyAccountInfo() {
+            const info = document.getElementById('telegramBtn').dataset.info;
+            
+            // Создаем временный textarea
+            const textarea = document.createElement('textarea');
+            textarea.value = info;
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                alert('Данные скопированы!');
+            } catch (err) {
+                alert('Ошибка копирования');
+            }
+            
+            document.body.removeChild(textarea);
+        }
+        
+        // Закрытие модалки при клике вне
+        document.getElementById('buyModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        
+        // Загрузка темы
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+        }
+        
+        // Запуск
+        loadData();
+    </script>
 </body>
 </html>
