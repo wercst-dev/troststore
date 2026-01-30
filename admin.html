@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ панель | TG Accounts</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="admin-page">
+    <!-- Логин форма -->
+    <div id="loginForm" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <i class="fas fa-lock fa-2x"></i>
+                <h2>Администратор</h2>
+                <p>Введите пароль для входа</p>
+            </div>
+            
+            <form id="loginFormElement" class="login-form">
+                <div class="input-group">
+                    <i class="fas fa-key"></i>
+                    <input type="password" id="adminPassword" placeholder="Пароль" required>
+                </div>
+                
+                <div id="loginError" class="error-message hidden"></div>
+                
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Войти
+                </button>
+                
+                <div class="login-hint">
+                    <p><strong>Пароль по умолчанию:</strong> admin123</p>
+                    <p><small>Измените его в admin-script.js после первого входа</small></p>
+                </div>
+                
+                <div class="login-info">
+                    <p><i class="fas fa-user-shield"></i> Главный админ: @opavshue</p>
+                    <p><i class="fas fa-headset"></i> Техподдержка: @opavshue</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Админ панель (скрыта до входа) -->
+    <div id="adminPanel" class="admin-panel hidden">
+        <!-- Шапка админки -->
+        <header class="admin-header">
+            <div class="container">
+                <div class="admin-header-content">
+                    <div class="admin-title">
+                        <h1><i class="fas fa-cogs"></i> Панель управления</h1>
+                        <p class="admin-subtitle">Главный админ: @opavshue</p>
+                    </div>
+                    
+                    <div class="admin-actions">
+                        <button id="logoutBtn" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Выйти
+                        </button>
+                        <button id="themeToggleAdmin" class="theme-btn">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Основной контент -->
+        <main class="admin-main">
+            <div class="container">
+                <!-- Форма добавления -->
+                <div class="admin-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-plus-circle"></i> Добавить новое объявление
+                    </h2>
+                    
+                    <form id="addAccountForm" class="account-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="accountTitle">
+                                    <i class="fas fa-heading"></i> Название аккаунта
+                                </label>
+                                <input type="text" id="accountTitle" required 
+                                       placeholder="Например: Премиум аккаунт с историей">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="accountPrice">
+                                    <i class="fas fa-tag"></i> Цена (₽)
+                                </label>
+                                <input type="number" id="accountPrice" required 
+                                       placeholder="500" min="100" step="100">
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label for="accountDescription">
+                                    <i class="fas fa-align-left"></i> Описание
+                                </label>
+                                <textarea id="accountDescription" rows="4" required
+                                          placeholder="Подробное описание аккаунта..."></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="accountStatus">
+                                    <i class="fas fa-toggle-on"></i> Статус
+                                </label>
+                                <select id="accountStatus">
+                                    <option value="active">Активно</option>
+                                    <option value="sold">Продано</option>
+                                    <option value="hidden">Скрыто</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="accountType">
+                                    <i class="fas fa-star"></i> Тип
+                                </label>
+                                <select id="accountType">
+                                    <option value="premium">Премиум</option>
+                                    <option value="standard">Стандарт</option>
+                                    <option value="budget">Бюджет</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-check"></i> Добавить объявление
+                            </button>
+                            <button type="button" id="clearFormBtn" class="btn-secondary">
+                                <i class="fas fa-times"></i> Очистить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Список аккаунтов -->
+                <div class="admin-section">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-list"></i> Все объявления
+                            <span id="adminAccountsCount" class="count-badge">0</span>
+                        </h2>
+                        
+                        <div class="section-actions">
+                            <button id="exportBtn" class="btn-icon">
+                                <i class="fas fa-download"></i> Экспорт
+                            </button>
+                            <button id="refreshBtn" class="btn-icon">
+                                <i class="fas fa-sync-alt"></i> Обновить
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="adminAccountsList" class="admin-accounts-list">
+                        <!-- Аккаунты загружаются через JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Футер админки -->
+        <footer class="admin-footer">
+            <div class="container">
+                <div class="admin-footer-content">
+                    <div class="stats">
+                        <p><i class="fas fa-chart-bar"></i> Статистика:</p>
+                        <p>Активных: <span id="activeCount">0</span></p>
+                        <p>Продано: <span id="soldCount">0</span></p>
+                        <p>Общая сумма: <span id="totalValue">0</span>₽</p>
+                    </div>
+                    
+                    <div class="info">
+                        <p><i class="fas fa-exclamation-circle"></i> Важно: Все данные сохраняются в локальное хранилище</p>
+                        <p><i class="fas fa-backup"></i> Рекомендуется регулярно экспортировать базу данных</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Модальные окна -->
+    <div id="editModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Редактировать объявление</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editAccountForm">
+                    <!-- Форма заполняется через JS -->
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin-script.js"></script>
+</body>
+</html>
