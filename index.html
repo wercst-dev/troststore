@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Accounts Store</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Быстрые inline стили */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; transition: background 0.3s; }
+        .hidden { display: none !important; }
+        
+        /* Тема */
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --card: #f8f9fa;
+            --border: #e0e0e0;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+        }
+        .dark { 
+            --bg: #000000; 
+            --text: #ffffff; 
+            --card: #1a1a1a;
+            --border: #333333;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+        }
+        body { background: var(--bg); color: var(--text); }
+        
+        /* Загрузчик */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Загрузчик -->
+    <div id="loader" style="
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: var(--bg);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    ">
+        <div class="loader"></div>
+        <p style="margin-top: 20px;">Загрузка...</p>
+    </div>
+
+    <!-- Шапка -->
+    <header style="
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        padding: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    ">
+        <div style="
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        ">
+            <h1 style="font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                <i class="fab fa-telegram" style="color: var(--accent);"></i>
+                TG Аккаунты
+            </h1>
+            
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="admin.html" style="
+                    text-decoration: none;
+                    padding: 8px 16px;
+                    background: var(--accent);
+                    color: white;
+                    border-radius: 6px;
+                    font-size: 0.9rem;
+                ">
+                    <i class="fas fa-lock"></i> Админ
+                </a>
+                
+                <button id="themeToggle" style="
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    border: 1px solid var(--border);
+                    background: var(--card);
+                    color: var(--text);
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Поиск -->
+    <section style="
+        padding: 2rem 1rem;
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+    ">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div style="
+                display: flex;
+                align-items: center;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 0 15px;
+                max-width: 600px;
+                margin: 0 auto 1rem auto;
+            ">
+                <i class="fas fa-search" style="color: #666;"></i>
+                <input type="text" id="searchInput" placeholder="Поиск аккаунтов..." style="
+                    flex: 1;
+                    padding: 15px;
+                    border: none;
+                    background: none;
+                    color: var(--text);
+                    font-size: 1rem;
+                ">
+                <button id="searchBtn" style="
+                    padding: 12px 24px;
+                    background: var(--accent);
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-weight: 600;
+                ">
+                    Найти
+                </button>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button class="filter-btn active" data-filter="all" style="
+                    padding: 8px 16px;
+                    border: 1px solid var(--border);
+                    background: var(--card);
+                    color: var(--text);
+                    border-radius: 20px;
+                    cursor: pointer;
+                ">Все</button>
+                <button class="filter-btn" data-filter="available" style="
+                    padding: 8px 16px;
+                    border: 1px solid var(--border);
+                    background: var(--card);
+                    color: var(--text);
+                    border-radius: 20px;
+                    cursor: pointer;
+                ">В наличии</button>
+                <button class="filter-btn" data-filter="premium" style="
+                    padding: 8px 16px;
+                    border: 1px solid var(--border);
+                    background: var(--card);
+                    color: var(--text);
+                    border-radius: 20px;
+                    cursor: pointer;
+                ">Премиум</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Основной контент -->
+    <main style="padding: 2rem 1rem; min-height: 60vh;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div style="margin-bottom: 2rem;">
+                <p>Найдено: <span id="accountsCount">0</span> аккаунтов</p>
+            </div>
+
+            <!-- Аккаунты -->
+            <div id="accountsGrid" style="
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 1.5rem;
+                margin-bottom: 3rem;
+            ">
+                <!-- Аккаунты загружаются через JS -->
+            </div>
+
+            <!-- Нет аккаунтов -->
+            <div id="noAccounts" class="hidden" style="
+                text-align: center;
+                padding: 3rem;
+                color: #666;
+            ">
+                <i class="fas fa-search fa-3x" style="margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Аккаунты не найдены</h3>
+                <p>Попробуйте изменить параметры поиска</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Футер -->
+    <footer style="
+        background: var(--card);
+        border-top: 1px solid var(--border);
+        padding: 3rem 1rem 1rem;
+    ">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 2rem;
+                margin-bottom: 2rem;
+            ">
+                <div>
+                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-shopping-cart"></i> Как купить
+                    </h3>
+                    <p>1. Выберите аккаунт</p>
+                    <p>2. Нажмите "Купить"</p>
+                    <p>3. Напишите в Telegram</p>
+                </div>
+                
+                <div>
+                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-headset"></i> Контакты
+                    </h3>
+                    <p>
+                        <i class="fab fa-telegram"></i>
+                        Для покупки: <a href="https://t.me/tonurx" target="_blank" style="color: var(--accent);">@tonurx</a>
+                    </p>
+                    <p>
+                        <i class="fas fa-life-ring"></i>
+                        Техподдержка: <a href="https://t.me/opavshue" target="_blank" style="color: var(--accent);">@opavshue</a>
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-shield-alt"></i> Гарантии
+                    </h3>
+                    <p>✓ 100% безопасно</p>
+                    <p>✓ Мгновенная доставка</p>
+                    <p>✓ Гарантия 30 дней</p>
+                </div>
+            </div>
+            
+            <div style="
+                text-align: center;
+                padding-top: 2rem;
+                border-top: 1px solid var(--border);
+                color: #666;
+                font-size: 0.9rem;
+            ">
+                <p>© 2024 Telegram Accounts Store | v1.0</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Модалка покупки -->
+    <div id="buyModal" class="hidden" style="
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+    ">
+        <div style="
+            background: var(--card);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        ">
+            <div style="
+                padding: 1.5rem;
+                border-bottom: 1px solid var(--border);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            ">
+                <h3>Купить аккаунт</h3>
+                <button id="closeModal" style="
+                    background: none;
+                    border: none;
+                    font-size: 1.5rem;
+                    color: var(--text);
+                    cursor: pointer;
+                ">&times;</button>
+            </div>
+            
+            <div style="padding: 1.5rem;">
+                <div id="modalAccountInfo"></div>
+                
+                <div style="
+                    margin: 1.5rem 0;
+                    padding: 1rem;
+                    background: var(--bg);
+                    border-radius: 8px;
+                ">
+                    <p><strong>Инструкция:</strong></p>
+                    <ol style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                        <li>Скопируйте информацию об аккаунте</li>
+                        <li>Перейдите в Telegram</li>
+                        <li>Напишите <a href="https://t.me/tonurx" target="_blank" style="color: var(--accent);">@tonurx</a></li>
+                        <li>Отправьте данные аккаунта</li>
+                        <li>Ожидайте ответа (1-5 минут)</li>
+                    </ol>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button id="copyInfoBtn" style="
+                        flex: 1;
+                        padding: 12px;
+                        background: var(--accent);
+                        color: white;
+                        border: none;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                    ">
+                        <i class="fas fa-copy"></i> Скопировать данные
+                    </button>
+                    
+                    <a id="telegramLink" target="_blank" style="
+                        flex: 1;
+                        padding: 12px;
+                        background: #0088cc;
+                        color: white;
+                        border-radius: 6px;
+                        text-decoration: none;
+                        text-align: center;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                    ">
+                        <i class="fab fa-telegram"></i> Написать в Telegram
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
