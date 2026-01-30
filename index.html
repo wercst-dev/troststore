@@ -6,160 +6,22 @@
     <title>Telegram Accounts Store</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
 <body>
-    <!-- Тема переключения -->
-    <div class="theme-switcher">
-        <button id="themeToggle" class="theme-btn">
-            <i class="fas fa-moon"></i>
-        </button>
+    <!-- Добавьте загрузочный экран -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loader"></div>
+        <p>Загрузка аккаунтов...</p>
     </div>
 
-    <!-- Шапка -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <h1 class="logo">
-                    <i class="fab fa-telegram"></i>
-                    TG Accounts
-                </h1>
-                <nav class="nav">
-                    <a href="index.html" class="nav-link active">
-                        <i class="fas fa-store"></i> Магазин
-                    </a>
-                    <a href="admin.html" class="nav-link">
-                        <i class="fas fa-lock"></i> Админ
-                    </a>
-                    <button id="mobileMenuBtn" class="mobile-menu-btn">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </nav>
-            </div>
-        </div>
-    </header>
+    <!-- Остальной код остается как был, но обновите script.js -->
+    <!-- ... -->
 
-    <!-- Поиск -->
-    <section class="search-section">
-        <div class="container">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Поиск аккаунтов...">
-                <button id="searchBtn" class="search-btn">Найти</button>
-            </div>
-            <div class="search-filters">
-                <button class="filter-btn active" data-filter="all">Все</button>
-                <button class="filter-btn" data-filter="available">В наличии</button>
-                <button class="filter-btn" data-filter="premium">Премиум</button>
-                <button class="filter-btn" data-filter="cheap">До 1000₽</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Основной контент -->
-    <main class="main">
-        <div class="container">
-            <div class="stats">
-                <p>Найдено: <span id="accountsCount">0</span> аккаунтов</p>
-            </div>
-
-            <!-- Сетка аккаунтов -->
-            <div id="accountsGrid" class="accounts-grid">
-                <!-- Аккаунты загружаются через JS -->
-            </div>
-
-            <!-- Сообщение если нет аккаунтов -->
-            <div id="noAccounts" class="no-accounts hidden">
-                <i class="fas fa-search fa-3x"></i>
-                <h3>Аккаунты не найдены</h3>
-                <p>Попробуйте изменить параметры поиска</p>
-            </div>
-        </div>
-    </main>
-
-    <!-- Футер -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3><i class="fas fa-shopping-cart"></i> Как купить</h3>
-                    <p>1. Выберите аккаунт</p>
-                    <p>2. Нажмите "Купить"</p>
-                    <p>3. Напишите в Telegram</p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3><i class="fas fa-headset"></i> Контакты</h3>
-                    <p class="contact-link">
-                        <i class="fab fa-telegram"></i>
-                        Для покупки: <a href="https://t.me/tonurx" target="_blank">@tonurx</a>
-                    </p>
-                    <p class="contact-link">
-                        <i class="fas fa-life-ring"></i>
-                        Техподдержка: <a href="https://t.me/opavshue" target="_blank">@opavshue</a>
-                    </p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3><i class="fas fa-shield-alt"></i> Гарантии</h3>
-                    <p>✓ 100% безопасно</p>
-                    <p>✓ Мгновенная доставка</p>
-                    <p>✓ Гарантия 30 дней</p>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>© 2024 Telegram Accounts Store | HTML версия</p>
-                <p class="version">v1.0.0</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Модальное окно покупки -->
-    <div id="buyModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Купить аккаунт</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="modalAccountInfo"></div>
-                <div class="instructions">
-                    <p><strong>Инструкция:</strong></p>
-                    <ol>
-                        <li>Скопируйте информацию об аккаунте</li>
-                        <li>Перейдите в Telegram</li>
-                        <li>Напишите <a href="https://t.me/tonurx" target="_blank">@tonurx</a></li>
-                        <li>Отправьте данные аккаунта</li>
-                        <li>Ожидайте ответа (обычно 1-5 минут)</li>
-                    </ol>
-                </div>
-                <div class="modal-actions">
-                    <button id="copyInfoBtn" class="btn-primary">
-                        <i class="fas fa-copy"></i> Скопировать данные
-                    </button>
-                    <a id="telegramLink" class="btn-telegram" target="_blank">
-                        <i class="fab fa-telegram"></i> Написать в Telegram
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Мобильное меню -->
-    <div id="mobileMenu" class="mobile-menu hidden">
-        <button class="mobile-menu-close">&times;</button>
-        <a href="index.html" class="mobile-menu-link">
-            <i class="fas fa-store"></i> Магазин
-        </a>
-        <a href="admin.html" class="mobile-menu-link">
-            <i class="fas fa-lock"></i> Админ панель
-        </a>
-        <div class="mobile-menu-footer">
-            <p>Поддержка: @opavshue</p>
-        </div>
-    </div>
-
+    <script src="firebase-config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
